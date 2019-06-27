@@ -1,0 +1,51 @@
+---
+title: "Ramen Rating Analysis"
+author: "Vaibhav"
+date: "6/27/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(readr)
+library(tidyverse)
+ramen_ratings <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-06-04/ramen_ratings.csv")
+
+View(ramen_ratings)
+
+theme_set(theme_light())
+```
+
+
+```{r}
+library(drlib)
+
+ramen_ratings_processed <- ramen_ratings %>%
+  mutate(
+    style = fct_lump(style, 4),
+    brand = fct_lump(brand, 20),
+    country = fct_lump(country, 12)
+  ) %>%
+  replace_na(list(style = "Other"))
+
+
+ramen_ratings_processed %>%
+  gather(category, value, -review_number, -stars) %>%
+  count(category, value) %>%
+  group_by(category) %>%
+  top_n(20) %>%
+  ungroup() %>%
+  mutate(value = reorder_within(value, n, category)) %>%
+  ggplot(aes(x = value, y = n)) + 
+  geom_col() + 
+  facet_wrap(~category, scales = "free_y") + 
+  coord_flip()+
+  scale_x_reordered()+
+  labs(title="Categorical variable", x="Predictor",y="count")
+
+```
+
+```{r}
+
+```
+
